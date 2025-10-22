@@ -1,0 +1,21 @@
+{
+  "name": "string-analyzer-service",
+  "version": "1.0.0",
+  "description": "RESTful API that analyses strings, computes properties like length, word count, and palindrome status, and supports advanced filtering including natural language queries.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [],
+  "author": "Daniel Ayesoro",
+  "license": "ISC",
+  "type": "commonjs",
+  "homepage": "https://github.com/Dayesoro/string-analyzer-service#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
