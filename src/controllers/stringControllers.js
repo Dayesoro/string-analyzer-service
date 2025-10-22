@@ -1,5 +1,5 @@
 const { analyzeString } = require('../utils/stringAnalyzer.js');
-const { addString, stringExists, findString, removeString } = require('../models/stringStore.js');
+const { addString, stringExists, findString, getAllStrings: getAllStringsFromStore, removeString } = require('../models/stringStore.js');
 
 
 // Create and analyze a new string
@@ -74,6 +74,24 @@ const getString = (req, res) => {
     });
 };
 
+// Get all strings
+const getAllStrings = (req, res) => {
+
+    let strings = getAllStringsFromStore();
+
+    // Track filters applied
+    const filtersApplied = {}
+
+    // Return the results
+    return res.status(200).json({
+        data: strings,
+        count: strings.length,
+        filters_applied: filtersApplied
+    });
+
+
+}
+
 // Delete a specific string
 const deleteString = (req, res) => {
     // Get and decode the string value from URL parameter
@@ -97,5 +115,6 @@ const deleteString = (req, res) => {
 module.exports = {
     createString,
     getString,
+    getAllStrings,
     deleteString
 };
