@@ -1,5 +1,5 @@
 const { analyzeString } = require('../utils/stringAnalyzer.js');
-const { addString, stringExists, findString } = require('../models/stringStore.js');
+const { addString, stringExists, findString, removeString } = require('../models/stringStore.js');
 
 
 // Create and analyze a new string
@@ -74,7 +74,28 @@ const getString = (req, res) => {
     });
 };
 
+// Delete a specific string
+const deleteString = (req, res) => {
+    // Get and decode the string value from URL parameter
+    const stringValue = decodeURIComponent(req.params.string_value);
+
+    // Try to remove the string
+    const wasRemoved = removeString(stringValue);
+
+    // If not found, return 404
+    if (!wasRemoved) {
+        return res.status(404).json({
+            error: 'Not Found',
+            message: 'String does not exist in the system'
+        });
+    }
+
+    // Return 204 No Content (success with no body)
+    return res.status(204).send();
+};
+
 module.exports = {
     createString,
-    getString
+    getString,
+    deleteString
 };
