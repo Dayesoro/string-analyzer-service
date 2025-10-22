@@ -76,11 +76,81 @@ const getString = (req, res) => {
 
 // Get all strings
 const getAllStrings = (req, res) => {
-
+    // Get all strings from stringStore
     let strings = getAllStringsFromStore();
 
+    // Extract query parameters
+    const {
+        is_palindrome,
+        min_length,
+        max_length,
+        word_count,
+        contains_character
+    } = req.query;
+
     // Track filters applied
-    const filtersApplied = {}
+    const filtersApplied = {};
+
+    // Apply filters one by one
+
+    // Filter by palindrome
+    if (is_palindrome !== undefined) {
+        const isPalindromeFilter = is_palindrome === 'true';
+        strings = strings.filter(str => str.properties.is_palindrome === isPalindromeFilter);
+        filtersApplied.is_palindrome = isPalindromeFilter;
+    }
+
+    // Filter by minimum length
+    if (min_length !== undefined) {
+        const minLen = parseInt(min_length);
+        if (isNaN(minLen)) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'min_length must be a valid integer'
+            });
+        }
+        strings = strings.filter(str => str.properties.length >= minLen);
+        filtersApplied.min_length = minLen;
+    }
+
+    // Filter by maximum length
+    if (max_length !== undefined) {
+        const maxLen = parseInt(max_length);
+        if (isNaN(maxLen)) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'max_length must be a valid integer'
+            });
+        }
+        strings = strings.filter(str => str.properties.length <= maxLen);
+        filtersApplied.max_length = maxLen;
+    }
+
+    // Filter by word count
+    if (word_count !== undefined) {
+        const wordCnt = parseInt(word_count);
+        if (isNaN(wordCnt)) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'word_count must be a valid integer'
+            });
+        }
+        strings = strings.filter(str => str.properties.word_count === wordCnt);
+        filtersApplied.word_count = wordCnt;
+    }
+
+    // Filter by contains character
+    if (contains_character !== undefined) {
+        if (typeof contains_character !== 'string' || contains_character.length !== 1) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'contains_character must be a single character'
+            });
+        }
+        strings = strings.filter(str => str.value.includes(contains_character));
+        filtersApplied.contains_character = contains_character;
+    }
+
 
     // Return the results
     return res.status(200).json({
