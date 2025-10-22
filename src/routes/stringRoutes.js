@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { createString, getString, deleteString, getAllStrings } = require('../controllers/stringControllers');
+const { createString, getString, deleteString, getAllStrings, filterByNaturalLanguage } = require('../controllers/stringControllers');
 
 // Create and analyze a new string
 router.post('/strings', createString);
+
+// filter-by-natural-language - MUST come before /:string_value
+router.get('/strings/filter-by-natural-language', filterByNaturalLanguage);
 
 // Get all strings with optional filters
 router.get('/strings', getAllStrings)

@@ -1,4 +1,5 @@
 const { analyzeString } = require('../utils/stringAnalyzer.js');
+const { parseNaturalLanguageQuery } = require('../utils/naturalLanguageParser');
 const { addString, stringExists, findString, getAllStrings: getAllStringsFromStore, removeString } = require('../models/stringStore.js');
 
 
@@ -162,6 +163,80 @@ const getAllStrings = (req, res) => {
 
 }
 
+// Filter using natural language
+const filterByNaturalLanguage = (req, res) => {
+    // Get the query parameter
+    const naturalQuery = req.query.query;
+
+    // Validate query exists
+    if (!naturalQuery) {
+        return res.status(400).json({
+            error: 'Bad Request',
+            message: 'Unable to parse natural language query'
+        });
+    }
+
+    // Parse the natural language query
+    const parsedFilters = parseNaturalLanguageQuery(naturalQuery);
+
+    // Check if any filters were extracted
+    if (Object.keys(parsedFilters).length === 0) {
+        return res.status(400).json({
+            error: 'Bad Request',
+            message: 'Unable to parse natural language query'
+        });
+    }
+
+    // Check for conflicting filters
+    if (parsedFilters.min_length !== undefined && parsedFilters.max_length !== undefined) {
+        if (parsedFilters.min_length > parsedFilters.max_length) {
+            return res.status(422).json({
+                error: 'Unprocessable Entity',
+                message: 'Query parsed but resulted in conflicting filters',
+                details: `min_length (${parsedFilters.min_length}) cannot be greater than max_length (${parsedFilters.max_length})`
+            });
+        }
+    }
+
+    // Get all strings and apply the parsed filters
+    let strings = getAllStringsFromStore();
+
+    // Apply palindrome filter
+    if (parsedFilters.is_palindrome !== undefined) {
+        strings = strings.filter(str => str.properties.is_palindrome === parsedFilters.is_palindrome);
+    }
+
+    // Apply min_length filter
+    if (parsedFilters.min_length !== undefined) {
+        strings = strings.filter(str => str.properties.length >= parsedFilters.min_length);
+    }
+
+    // Apply max_length filter
+    if (parsedFilters.max_length !== undefined) {
+        strings = strings.filter(str => str.properties.length <= parsedFilters.max_length);
+    }
+
+    // Apply word_count filter
+    if (parsedFilters.word_count !== undefined) {
+        strings = strings.filter(str => str.properties.word_count === parsedFilters.word_count);
+    }
+
+    // Apply contains_character filter
+    if (parsedFilters.contains_character !== undefined) {
+        strings = strings.filter(str => str.value.includes(parsedFilters.contains_character));
+    }
+
+    // Return results with interpretation
+    return res.status(200).json({
+        data: strings,
+        count: strings.length,
+        interpreted_query: {
+            original: naturalQuery,
+            parsed_filters: parsedFilters
+        }
+    });
+};
+
 // Delete a specific string
 const deleteString = (req, res) => {
     // Get and decode the string value from URL parameter
@@ -186,5 +261,6 @@ module.exports = {
     createString,
     getString,
     getAllStrings,
+    filterByNaturalLanguage,
     deleteString
 };
