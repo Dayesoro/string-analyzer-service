@@ -1,5 +1,5 @@
 const { analyzeString } = require('../utils/stringAnalyzer.js');
-const { addString, stringExists } = require('../models/stringStore.js');
+const { addString, stringExists, findString } = require('../models/stringStore.js');
 
 
 // Create and analyze a new string
@@ -49,6 +49,32 @@ const createString = (req, res) => {
     });
 }
 
+// Get a specific string
+const getString = (req, res) => {
+    // Get the string value from URL parameter and decode it
+    const stringValue = decodeURIComponent(req.params.string_value);
+
+    // Find the string in our data store
+    const stringRecord = findString(stringValue);
+
+    // If not found, return 404
+    if (!stringRecord) {
+        return res.status(404).json({
+            error: 'Not Found',
+            message: 'String does not exist in the system'
+        });
+    }
+
+    // Return the string data
+    return res.status(200).json({
+        id: stringRecord.id,
+        value: stringRecord.value,
+        properties: stringRecord.properties,
+        created_at: stringRecord.created_at
+    });
+};
+
 module.exports = {
-    createString
+    createString,
+    getString
 };
