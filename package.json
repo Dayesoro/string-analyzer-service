@@ -13,6 +13,7 @@
   "type": "commonjs",
   "homepage": "https://github.com/Dayesoro/string-analyzer-service#readme",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "express": "^5.1.0"
   },
   "devDependencies": {
